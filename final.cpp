@@ -24,11 +24,12 @@
 #define PORT 18756
 #define BUFFER_SIZE 1024
 
-void sendCommand(int clientSocket, const void* data, size_t size) {
+/*void sendCommand(int clientSocket, const void* data, size_t size) {
     ssize_t bytesSent = send(clientSocket, data, size, 0);
     if (bytesSent <= 0) {
         perror("send error");
         exit(1);
+
     }
 }
 
@@ -38,12 +39,13 @@ void recvData(int clientSocket, void* buffer, size_t size) {
         perror("recv error");
         exit(1);
     }
-}
+}*/
 
 
 
 
 
+/*
 std::string recvStr(int clientSocket) {
     uint32_t len;
     recvData(clientSocket, &len, sizeof(len));
@@ -52,16 +54,7 @@ std::string recvStr(int clientSocket) {
     recvData(clientSocket, buffer, len);
     return std::string(buffer);
 }
-
-
-
-
-
-void sendFormattedMessage(int clientSocket,  std::string response) {
-
-////
-
-}
+*/
 
 
 
@@ -70,8 +63,38 @@ void sendFormattedMessage(int clientSocket,  std::string response) {
 
 
 
-void receiveMessages() {
-    ///
+
+
+void receiveMessages(int clientSocket) {
+
+    char buffer[BUFFER_SIZE] ;
+    std::ofstream file ("message.txt", std::ios::app);
+
+
+    while (true) {
+         memset(&buffer, 0, sizeof(buffer));
+        int valread = recv(clientSocket, buffer, BUFFER_SIZE, 0);
+        if (valread > 0) {
+            uint16_t tag = (buffer[0] << 8) | buffer[1];
+            uint16_t length = (buffer[2] << 8) | buffer[3];
+
+            std::string message(buffer + 2, length);
+
+            std::time_t now = std::time(nullptr);
+            std::tm* localTime = std::localtime(&now);
+            char timeBuffer[20];
+            std::strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %H:%M:%S", localTime);
+
+            file << "[" << timeBuffer << "] Повідомлення від сервера: " << message << std::endl;
+
+            std::cout << "Отримано повідомлення: " << message << std::endl;
+        } else {
+            break;
+        }
+    }
+
+    file.close();
+
 
 }
 
@@ -109,19 +132,22 @@ int main() {
     std::cout << "Підключено до сервера!" << std::endl;
 
 
-    /*
+    std::cout << "Підключено до сервера!" << std::endl;
+
     std::thread receiveThread(receiveMessages, clientSocket);
     std::string response;
-    */
+    while (true) {
+       // receiveMessages(clientSocket);
 
-    /*while (true) {
+
         std::cout << "Ваша відповідь: ";
         std::getline(std::cin, response);
         if (response == "exit") break;
 
 
-        sendFormattedMessage(clientSocket, response);
-    }*/
+
+
+    }
 
     close(clientSocket);
     return 0;
