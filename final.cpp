@@ -1,61 +1,15 @@
 #include <iostream>
-#include <cstring>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <iostream>
+#include <thread>
+#include <string>
 #include <cstring>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <fstream>
-#include <dirent.h>
-#include <vector>
-#include <thread>
-#include <filesystem>
-#include <filesystem>
-#include <mutex>
-#include <queue>
-#define BUFFER_SIZE 1024
-#define SERVER_DIR "./server_files/"
-#include <stack>
-#include <unordered_map>
-#include <algorithm>
-#include <vector>
+#include <ctime>
+
 
 #define PORT 18756
 #define BUFFER_SIZE 1024
-
-/*void sendCommand(int clientSocket, const void* data, size_t size) {
-    ssize_t bytesSent = send(clientSocket, data, size, 0);
-    if (bytesSent <= 0) {
-        perror("send error");
-        exit(1);
-
-    }
-}
-
-void recvData(int clientSocket, void* buffer, size_t size) {
-    ssize_t bytesRead = recv(clientSocket, buffer, size, 0);
-    if (bytesRead <= 0) {
-        perror("recv error");
-        exit(1);
-    }
-}*/
-
-
-
-
-
-/*
-std::string recvStr(int clientSocket) {
-    uint32_t len;
-    recvData(clientSocket, &len, sizeof(len));
-    len = ntohl(len);
-    char buffer[BUFFER_SIZE] = {0};
-    recvData(clientSocket, buffer, len);
-    return std::string(buffer);
-}
-*/
-
 
 
 
@@ -70,6 +24,10 @@ void receiveMessages(int clientSocket) {
     char buffer[BUFFER_SIZE] ;
     std::ofstream file ("message.txt", std::ios::app);
 
+    if (!file) {
+        std::cerr << "err" << std::endl;
+        return;
+    }
 
     while (true) {
          memset(&buffer, 0, sizeof(buffer));
@@ -78,7 +36,7 @@ void receiveMessages(int clientSocket) {
             uint16_t tag = (buffer[0] << 8) | buffer[1];
             uint16_t length = (buffer[2] << 8) | buffer[3];
 
-            std::string message(buffer + 2, length);
+            std::string message(buffer + 4, length);
 
             std::time_t now = std::time(nullptr);
             std::tm* localTime = std::localtime(&now);
@@ -150,5 +108,6 @@ int main() {
     }
 
     close(clientSocket);
+    receiveThread.join();
     return 0;
 }
