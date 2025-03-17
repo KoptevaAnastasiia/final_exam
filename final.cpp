@@ -116,6 +116,34 @@ void sendVAriant(int clientSocket, const std::string &var) {
 
 
 
+void conf(int clientSocket, const std::string &con) {
+
+    uint8_t tag= 0x06;
+    u_int32_t len= con.size();
+    char buffer[BUFFER_SIZE];
+    memset(buffer, 0, BUFFER_SIZE);
+
+    buffer[0] = tag;
+    buffer[1] = (len >> 24) & 0xFF;
+    buffer[2] = (len >> 16) & 0xFF;
+    buffer[3] = (len >> 8) & 0xFF;
+    buffer[4] = (len) & 0xFF;
+
+    memcpy(buffer + 5,  con.c_str(), len);
+
+    int byteSent = send(clientSocket, buffer, 5 + len, 0);
+    if (byteSent == -1) {
+        std::cerr << "er" << std::endl;
+    } else {
+        std::cerr << "77777" << std::endl;
+    }
+
+
+
+}
+
+
+
 void processMessage(uint8_t tag, uint32_t length, const std::string &message, int clientSocket) {
 
 
@@ -138,8 +166,9 @@ void processMessage(uint8_t tag, uint32_t length, const std::string &message, in
         int var = 18;
         sendVAriant(clientSocket, "18");
     } else if (tag == 0x05) {
-         std::cerr << "variant: " << message << std::endl;
+        std::cerr << "variant: " << message << std::endl;
 
+        conf(clientSocket,"18");
 
     } else if (tag >= 0x10 && tag <= 0x50) {
          std::cout << "   " << std::hex << (int)tag << ": " << message << std::dec << std::endl;
